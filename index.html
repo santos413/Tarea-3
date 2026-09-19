@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NEUROCIRCUIT LAB | IA aplicada a la Ingeniería Electrónica</title>
+<meta name="description" content="Plataforma educativa interactiva de Inteligencia Artificial, Machine Learning y Ciencia de Datos con enfoque en Ingeniería Electrónica.">
+<meta name="author" content="Santo Miguel Coria Suma">
+<meta name="theme-color" content="#0d0a14">
+<style>
+:root{
+  --bg:#0d0a14;
+  --surface:rgba(28,19,46,.62);
+  --line:rgba(139,92,246,.30);
+  --line-strong:rgba(255,122,26,.55);
+  --text:#efe9fb;
+  --muted:#b1a6c9;
+  --orange:#ff7a1a;
+  --orange-soft:#ffa04d;
+  --purple:#8b5cf6;
+  --purple-soft:#b99cff;
+  --magenta:#e04fd0;
+  --glow-o:0 0 18px rgba(255,122,26,.42);
+  --glow-p:0 0 18px rgba(139,92,246,.42);
+  --radius:14px;
+  --mono:ui-monospace,"Cascadia Code","SF Mono",Consolas,"Liberation Mono",Menlo,monospace;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  font-family:var(--sans);font-size:16px;line-height:1.6;overflow-x:hidden;
+}
+body::before{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(30deg,rgba(139,92,246,.07) 1px,transparent 1px),
+    linear-gradient(150deg,rgba(139,92,246,.07) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,122,26,.035) 1px,transparent 1px);
+  background-size:56px 96px,56px 96px,56px 96px;
+}
+main,footer{position:relative;z-index:2}
+a{color:var(--orange-soft)}
+a:hover{color:#fff}
+:focus-visible{outline:2px solid var(--orange-soft);outline-offset:3px}
+.skip{position:absolute;left:-999px;top:8px;z-index:300;background:var(--orange);color:#1a0d00;padding:8px 14px;border-radius:8px}
+.skip:focus{left:8px}
+
+/* ---------- Navegación ---------- */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  background:rgba(13,10,20,.80);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line);
+}
+.nav-in{max-width:1240px;margin:0 auto;padding:0 20px;height:64px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{font-family:var(--mono);font-weight:700;color:var(--orange);text-decoration:none;letter-spacing:.04em;text-shadow:var(--glow-o);white-space:nowrap}
+.menu{display:none;list-style:none;margin:0;padding:0;gap:2px}
+.menu a{display:block;padding:8px 9px;font-size:.82rem;color:var(--muted);text-decoration:none;border-radius:8px;transition:color .2s,background .2s}
+.menu a:hover,.menu a.active{color:#fff;background:rgba(139,92,246,.18)}
+.menu a.active{box-shadow:inset 0 -2px 0 var(--orange)}
+@media(min-width:1180px){.menu{display:flex}.burger{display:none}}
+@media(max-width:1179px){
+  .menu.open{
+    display:flex;flex-direction:column;position:absolute;top:64px;left:0;right:0;
+    background:rgba(13,10,20,.97);padding:10px 20px 18px;border-bottom:1px solid var(--line);
+    max-height:calc(100vh - 64px);overflow-y:auto;
+  }
+  .menu.open a{padding:11px 10px;font-size:.95rem}
+}
+
+/* ---------- Estructura general ---------- */
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+section{position:relative;padding:84px 0 24px}
+.sec-head{margin-bottom:30px;max-width:720px}
+.sec-head h2{
+  font-family:var(--mono);font-size:clamp(1.6rem,3.2vw,2.3rem);line-height:1.2;
+  margin:0 0 10px;color:#fff;text-shadow:0 0 22px rgba(139,92,246,.6);
+}
+.sec-head p{margin:0;color:var(--muted)}
+.sub-h{font-family:var(--mono);font-size:1.15rem;margin:44px 0 14px;color:var(--orange-soft)}
+.note{color:var(--muted);font-size:.86rem;margin:10px 0 0}
+
+/* ---------- Tarjetas y paneles ---------- */
+.grid{display:grid;gap:18px}
+.cols-3{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.cols-2{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+.card,.panel{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+}
+.card{transition:transform .25s,border-color .25s,box-shadow .25s}
+.card:hover{transform:translateY(-4px);border-color:var(--line-strong);box-shadow:0 10px 30px rgba(0,0,0,.4),var(--glow-o)}
+.card h3{font-family:var(--mono);font-size:1.02rem;margin:8px 0 8px;color:#fff}
+.card p{margin:0 0 8px;color:var(--muted);font-size:.93rem}
+.ico{font-size:1.7rem;line-height:1}
+.ex{margin-top:12px!important;padding-top:10px;border-top:1px dashed var(--line);color:var(--purple-soft)!important;font-size:.88rem!important}
+.ex b{color:var(--orange-soft)}
+.tag{display:inline-block;padding:2px 9px;margin:6px 6px 0 0;border-radius:999px;border:1px solid var(--line);font-family:var(--mono);font-size:.75rem;color:var(--purple-soft)}
+.panel h3{margin:0 0 10px;font-size:1rem;font-family:var(--mono);color:var(--orange-soft)}
+
+/* ---------- Botones y controles ---------- */
+.btn{
+  font-family:var(--mono);font-size:.9rem;cursor:pointer;padding:11px 20px;border-radius:10px;
+  border:1px solid var(--orange);background:rgba(255,122,26,.12);color:var(--orange-soft);
+  text-decoration:none;display:inline-block;transition:background .2s,color .2s,box-shadow .2s;
+}
+.btn:hover{background:var(--orange);color:#1a0d00;box-shadow:var(--glow-o)}
+.btn.alt{border-color:var(--purple);background:rgba(139,92,246,.14);color:var(--purple-soft)}
+.btn.alt:hover{background:var(--purple);color:#fff;box-shadow:var(--glow-p)}
+.btn.small{padding:7px 12px;font-size:.8rem}
+.btn[aria-pressed="true"]{background:var(--orange);color:#1a0d00}
+.btn-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.chip{
+  font-family:var(--mono);font-size:.82rem;cursor:pointer;padding:8px 14px;border-radius:999px;
+  border:1px solid var(--line);background:transparent;color:var(--muted);transition:all .2s;
+}
+.chip:hover{color:#fff;border-color:var(--purple)}
+.chip[aria-selected="true"],.chip[aria-pressed="true"]{background:rgba(255,122,26,.16);border-color:var(--orange);color:var(--orange-soft)}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.ctl{margin-bottom:14px}
+.ctl label{display:flex;justify-content:space-between;gap:8px;font-family:var(--mono);font-size:.82rem;color:var(--muted);margin-bottom:5px}
+.ctl label span{color:var(--orange-soft)}
+input[type=range]{width:100%;accent-color:var(--orange)}
+select,input[type=text]{
+  width:100%;background:#0a0710;color:var(--text);border:1px solid var(--line);border-radius:10px;
+  padding:9px 10px;font-family:var(--mono);font-size:.88rem;
+}
+select:focus,input[type=text]:focus{border-color:var(--orange)}
+
+/* ---------- Demos ---------- */
+.demo{display:grid;grid-template-columns:1fr;gap:20px}
+@media(min-width:860px){.demo{grid-template-columns:300px 1fr}}
+.readout{
+  font-family:var(--mono);font-size:.84rem;color:var(--purple-soft);background:rgba(0,0,0,.35);
+  border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:10px 0 0;white-space:pre-wrap;word-break:break-word;
+}
+.big{font-family:var(--mono);font-size:2.6rem;line-height:1.1;margin:0 0 10px;color:var(--orange-soft);text-shadow:var(--glow-o)}
+.advice{margin:10px 0 0;color:var(--text)}
+.gauge{height:16px;border-radius:999px;background:#0a0710;border:1px solid var(--line);overflow:hidden}
+.gauge i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--purple),var(--orange));transition:width .3s}
+
+/* Flujos */
+.flow{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.step{
+  padding:10px 14px;border:1px solid var(--line);border-radius:10px;font-family:var(--mono);font-size:.85rem;
+  background:var(--surface);color:var(--text);transition:all .25s;
+}
+button.step{cursor:pointer}
+button.step:hover{border-color:var(--purple)}
+.step.on{border-color:var(--orange);color:#fff;box-shadow:var(--glow-o);background:rgba(255,122,26,.12)}
+.arrow{color:var(--purple-soft);font-family:var(--mono)}
+
+/* Línea de tiempo */
+.timeline{list-style:none;margin:0;padding:0;border-left:2px solid var(--line);max-width:760px}
+.timeline li{padding:0 0 18px 22px;position:relative;color:var(--muted)}
+.timeline li::before{content:"";position:absolute;left:-7px;top:7px;width:12px;height:12px;border-radius:50%;background:var(--orange);box-shadow:var(--glow-o)}
+.timeline b{color:var(--orange-soft);font-family:var(--mono);margin-right:6px}
+
+/* ---------- Inicio ---------- */
+#inicio{padding:112px 0 48px}
+.hero-grid{display:grid;gap:32px;align-items:center}
+@media(min-width:960px){.hero-grid{grid-template-columns:1.1fr .9fr}}
+.hero h1{
+  font-family:var(--mono);font-size:clamp(2.1rem,6vw,3.9rem);line-height:1.05;margin:0 0 14px;
+  color:var(--orange);letter-spacing:.02em;text-shadow:0 0 12px rgba(255,122,26,.7),0 0 42px rgba(139,92,246,.6);
+}
+.hero .sub{font-family:var(--mono);color:var(--purple-soft);font-size:clamp(.9rem,2vw,1.08rem);margin:0 0 16px}
+.hero .lead{max-width:56ch;color:var(--muted);margin:0}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin:24px 0 0}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:36px}
+@media(min-width:720px){.stats{grid-template-columns:repeat(4,1fr)}}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.stat b{display:block;font-family:var(--mono);font-size:1.5rem;color:var(--orange-soft)}
+.stat span{font-size:.82rem;color:var(--muted)}
+.rise{animation:rise .8s cubic-bezier(.2,.7,.2,1) both;animation-delay:var(--d,0s)}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+
+/* ---------- Ética ---------- */
+details.card summary{cursor:pointer;font-family:var(--mono);font-weight:700;color:#fff;list-style:none}
+details.card summary::-webkit-details-marker{display:none}
+details.card summary::before{content:"+";color:var(--orange);display:inline-block;width:1.1em}
+details[open].card summary::before{content:"\2212"}
+details.card p{margin-top:10px}
+details.card p b{color:var(--orange-soft)}
+
+/* ---------- Terminal ---------- */
+.term{background:#08050d;border:1px solid var(--line-strong);border-radius:14px;overflow:hidden;box-shadow:var(--glow-p)}
+.term-bar{display:flex;gap:6px;align-items:center;padding:10px 14px;background:#120b20;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:.78rem;color:var(--muted)}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.term-out{height:320px;overflow-y:auto;padding:14px;font-family:var(--mono);font-size:.85rem;color:var(--purple-soft);white-space:pre-wrap;word-break:break-word}
+.term-out .cmd{color:var(--orange-soft)}
+.term-out .err{color:var(--magenta)}
+.term-in{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--line);font-family:var(--mono);align-items:center}
+.term-in span{color:var(--orange)}
+.term-in input{flex:1;min-width:0;background:transparent;border:0;color:#fff;font-family:var(--mono);font-size:.9rem;padding:4px 0}
+.term-in input:focus-visible{outline:none}
+.term:focus-within{border-color:var(--orange)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+
+/* ---------- Sobre mí ---------- */
+.about{display:grid;gap:18px}
+@media(min-width:860px){.about{grid-template-columns:300px 1fr}}
+.avatar{
+  width:112px;height:112px;border-radius:50%;display:grid;place-items:center;margin-bottom:14px;
+  font-family:var(--mono);font-size:1.9rem;font-weight:700;color:var(--orange);background:#120b20;
+  border:2px solid var(--orange);box-shadow:var(--glow-o),inset 0 0 24px rgba(139,92,246,.35);
+}
+.contact{list-style:none;margin:12px 0 0;padding:0;font-size:.92rem}
+.contact li{margin:4px 0;word-break:break-word}
+
+/* ---------- Footer ---------- */
+footer{margin-top:60px;border-top:1px solid var(--line);background:rgba(10,7,16,.88);padding:36px 0}
+.foot{display:grid;gap:22px}
+@media(min-width:800px){.foot{grid-template-columns:1.4fr 1fr 1fr}}
+footer h3{font-family:var(--mono);font-size:.95rem;color:var(--orange-soft);margin:0 0 8px}
+footer p,footer li{color:var(--muted);font-size:.9rem;margin:0 0 6px}
+footer ul{list-style:none;margin:0;padding:0}
+.legal{margin-top:22px;padding-top:16px;border-top:1px dashed var(--line);font-size:.82rem;color:var(--muted)}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#contenido">Saltar al contenido</a>
+
+<!-- ===================== NAVEGACIÓN ===================== -->
+<header class="nav">
+  <div class="nav-in">
+    <a class="brand" href="#inicio">NEUROCIRCUIT LAB</a>
+    <button class="btn small burger" id="burger" type="button" aria-expanded="false" aria-controls="menu">Menú</button>
+    <nav aria-label="Principal">
+      <ul class="menu" id="menu">
+        <li><a href="#inicio">Inicio</a></li>
+        <li><a href="#ia">IA</a></li>
+        <li><a href="#ml">ML</a></li>
+        <li><a href="#datos">Datos</a></li>
+        <li><a href="#redes">Redes neuronales</a></li>
+        <li><a href="#generativa">IA generativa</a></li>
+        <li><a href="#playground">Playground</a></li>
+        <li><a href="#seguridad">Seguridad</a></li>
+        <li><a href="#aplicaciones">Aplicaciones</a></li>
+        <li><a href="#herramientas">Herramientas</a></li>
+        <li><a href="#etica">Ética</a></li>
+        <li><a href="#terminal">Terminal</a></li>
+        <li><a href="#sobre-mi">Sobre mí</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="contenido">
+<noscript><div class="wrap"><p class="panel">Esta página necesita JavaScript activado para mostrar las demostraciones interactivas.</p></div></noscript>
+
+<!-- ===================== INICIO ===================== -->
+<section id="inicio" class="hero">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <h1 class="rise">NEUROCIRCUIT LAB</h1>
+        <p class="sub rise" style="--d:.1s">IA • Machine Learning • Data Science • Ingeniería Electrónica</p>
+        <p class="lead rise" style="--d:.2s">Plataforma educativa para descubrir cómo la inteligencia artificial se conecta con sensores, señales y sistemas electrónicos. Cada sección explica un concepto y te deja probarlo con una demostración que puedes manipular.</p>
+        <div class="cta rise" style="--d:.3s">
+          <a class="btn" href="#ia">Explorar IA</a>
+          <a class="btn alt" href="#playground">Ir a la demo de ML</a>
+        </div>
+      </div>
+      <div class="panel rise" style="--d:.25s">
+        <h3>¿Qué encontrarás aquí?</h3>
+        <p>Conceptos de IA, Machine Learning y Ciencia de Datos explicados con ejemplos de electrónica.</p>
+        <ul style="color:var(--muted);font-size:.92rem;padding-left:18px;margin:10px 0 0">
+          <li>Demo interactiva de predicción de fallas</li>
+          <li>Terminal simulada con comandos</li>
+          <li>Aplicaciones, herramientas y ética</li>
+        </ul>
+      </div>
+    </div>
+    <div class="stats" id="stats">
+      <div class="stat"><b>128</b><span>Modelos analizados</span></div>
+      <div class="stat"><b>2400 GB</b><span>Datos procesados</span></div>
+      <div class="stat"><b>15320</b><span>Predicciones realizadas</span></div>
+      <div class="stat"><b>87</b><span>Amenazas detectadas</span></div>
+    </div>
+    <p class="note">Los indicadores son simulados con fines demostrativos.</p>
+  </div>
+</section>
+
+<!-- ===================== INTELIGENCIA ARTIFICIAL ===================== -->
+<section id="ia">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Inteligencia Artificial</h2>
+      <p>La IA reúne técnicas que permiten a una máquina percibir, aprender y decidir. Estos son los conceptos base, cada uno con un ejemplo del mundo de la electrónica.</p>
+    </div>
+    <div class="grid cols-3" id="iaCards"></div>
+
+    <h3 class="sub-h">Historia y evolución</h3>
+    <ol class="timeline">
+      <li><b>1950</b>Alan Turing plantea si las máquinas pueden pensar y propone su famosa prueba.</li>
+      <li><b>1956</b>En la conferencia de Dartmouth se acuña el término "inteligencia artificial".</li>
+      <li><b>1997</b>Deep Blue, de IBM, vence al campeón mundial de ajedrez Garry Kasparov.</li>
+      <li><b>2012</b>AlexNet demuestra la fuerza del aprendizaje profundo en visión por computadora.</li>
+      <li><b>2017</b>Aparece la arquitectura Transformer, base de los modelos de lenguaje actuales.</li>
+      <li><b>2022</b>Los modelos generativos de texto e imagen llegan al público general.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ===================== MACHINE LEARNING ===================== -->
+<section id="ml">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Machine Learning</h2>
+      <p>El aprendizaje automático permite que un modelo encuentre patrones en los datos en lugar de programarlos regla por regla. Existen tres grandes familias.</p>
+    </div>
+    <div class="grid cols-3" id="mlCards"></div>
+
+    <h3 class="sub-h">Demo: ¿fallará este motor?</h3>
+    <div class="demo panel">
+      <div>
+        <div class="ctl"><label for="mlTemp">Temperatura <span id="mlTempV"></span></label><input type="range" id="mlTemp" min="20" max="120" value="60"></div>
+        <div class="ctl"><label for="mlVib">Vibración <span id="mlVibV"></span></label><input type="range" id="mlVib" min="0" max="10" step="0.1" value="4"></div>
+        <div class="ctl"><label for="mlHours">Horas de uso <span id="mlHoursV"></span></label><input type="range" id="mlHours" min="0" max="5000" step="50" value="2000"></div>
+        <p class="note">Modifica las variables de un motor eléctrico y observa cómo cambia la probabilidad de falla que estima un modelo simulado.</p>
+      </div>
+      <div>
+        <p class="big" id="mlPct">0%</p>
+        <div class="gauge" aria-hidden="true"><i id="mlGauge"></i></div>
+        <p class="advice" id="mlAdvice" aria-live="polite"></p>
+        <div class="readout" id="mlCalc"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CIENCIA DE DATOS ===================== -->
+<section id="datos">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Ciencia de Datos</h2>
+      <p>La ciencia de datos convierte mediciones en decisiones. Pulsa cada etapa del ciclo para ver qué ocurre en ella.</p>
+    </div>
+    <div class="flow" id="dsFlow" role="group" aria-label="Ciclo de la ciencia de datos"></div>
+    <p class="readout" id="dsInfo" aria-live="polite"></p>
+  </div>
+</section>
+
+<!-- ===================== REDES NEURONALES ===================== -->
+<section id="redes">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Redes neuronales</h2>
+      <p>Una red transforma las entradas en una salida a través de capas de neuronas. Aquí tienes una explicación de sus partes.</p>
+    </div>
+    <div class="grid cols-3">
+      <article class="card"><div class="ico" aria-hidden="true">🔵</div><h3>Capa de entrada</h3><p>Recibe los datos crudos: lecturas de sensores, píxeles o valores numéricos.</p><p class="ex"><b>Ejemplo:</b> temperatura, vibración y horas de uso de un motor.</p></article>
+      <article class="card"><div class="ico" aria-hidden="true">🟣</div><h3>Capas ocultas</h3><p>Combinan las entradas con pesos y funciones de activación para detectar patrones.</p><p class="ex"><b>Ejemplo:</b> detectar que "alta temperatura + vibración" indica desgaste.</p></article>
+      <article class="card"><div class="ico" aria-hidden="true">🟠</div><h3>Capa de salida</h3><p>Entrega el resultado final: una clase, un número o una probabilidad.</p><p class="ex"><b>Ejemplo:</b> probabilidad de falla = 72%.</p></article>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== IA GENERATIVA ===================== -->
+<section id="generativa">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>IA generativa</h2>
+      <p>Los modelos generativos crean contenido nuevo a partir de lo que aprendieron: texto, imágenes, código y más.</p>
+    </div>
+    <div class="grid cols-3" id="genCards"></div>
+  </div>
+</section>
+
+<!-- ===================== PLAYGROUND ===================== -->
+<section id="playground">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>AI Playground</h2>
+      <p>Esta es la demostración principal de la página: un modelo simulado que estima la probabilidad de falla de un motor eléctrico. Mueve los controles en la sección <a href="#ml">Machine Learning</a>.</p>
+    </div>
+    <div class="panel">
+      <h3>¿Cómo funciona el modelo?</h3>
+      <p style="color:var(--muted);margin:0">El modelo combina tres variables con pesos fijos, aplica una función sigmoide y obtiene una probabilidad entre 0% y 100%. Es una versión simplificada de una regresión logística, uno de los algoritmos más usados en clasificación.</p>
+      <div class="readout" style="margin-top:14px">P = 1 / (1 + e^(-z))&#10;z = 0.04·(temp - 60) + 0.35·(vib - 4) + 0.0004·(horas - 2000)</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== IA Y CIBERSEGURIDAD ===================== -->
+<section id="seguridad">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>IA y ciberseguridad</h2>
+      <p>Los sistemas de seguridad usan IA para encontrar lo que se sale de lo normal en redes y dispositivos, incluidos los equipos IoT.</p>
+    </div>
+    <div class="grid cols-3" id="cyCards"></div>
+  </div>
+</section>
+
+<!-- ===================== APLICACIONES ===================== -->
+<section id="aplicaciones">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Aplicaciones de la IA</h2>
+      <p>De los sensores de una fábrica a la medicina: dónde se usa la IA hoy. Filtra por área para ver primero los usos ligados a la electrónica.</p>
+    </div>
+    <div class="tabs" id="appFilters" role="group" aria-label="Filtrar aplicaciones">
+      <button class="chip" type="button" data-f="all" aria-pressed="true">Todas</button>
+      <button class="chip" type="button" data-f="elec" aria-pressed="false">Electrónica</button>
+      <button class="chip" type="button" data-f="otros" aria-pressed="false">Otros sectores</button>
+    </div>
+    <div class="grid cols-3" id="appCards"></div>
+  </div>
+</section>
+
+<!-- ===================== TECNOLOGÍAS Y HERRAMIENTAS ===================== -->
+<section id="herramientas">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Tecnologías y herramientas</h2>
+      <p>El ecosistema de software que se usa para construir soluciones de IA y ciencia de datos.</p>
+    </div>
+    <div class="grid cols-3" id="toolCards"></div>
+
+    <h3 class="sub-h">Del hardware al modelo</h3>
+    <div class="flow" aria-label="Flujo del sensor a la decisión" style="margin-bottom:18px">
+      <div class="step">Sensor</div><span class="arrow" aria-hidden="true">→</span>
+      <div class="step">Microcontrolador</div><span class="arrow" aria-hidden="true">→</span>
+      <div class="step">Modelo</div><span class="arrow" aria-hidden="true">→</span>
+      <div class="step">Decisión</div>
+    </div>
+    <div class="grid cols-3" id="hwCards"></div>
+  </div>
+</section>
+
+<!-- ===================== ÉTICA Y FUTURO ===================== -->
+<section id="etica">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Ética y futuro de la IA</h2>
+      <p>La tecnología avanza rápido y sus efectos dependen de cómo se diseña y se usa. Cada tema muestra un desafío y una práctica responsable.</p>
+    </div>
+    <div class="grid cols-2" id="ethicsCards"></div>
+  </div>
+</section>
+
+<!-- ===================== TERMINAL ===================== -->
+<section id="terminal">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Terminal interactiva</h2>
+      <p>Una consola simulada. Escribe un comando o pulsa uno de los botones. No ejecuta nada real en tu equipo.</p>
+    </div>
+    <div class="term" id="term">
+      <div class="term-bar"><span class="dot" style="background:#e04fd0"></span><span class="dot" style="background:#ff7a1a"></span><span class="dot" style="background:#8b5cf6"></span>&nbsp; neurocircuit@lab:~</div>
+      <div class="term-out" id="termOut" role="log" aria-live="polite"></div>
+      <div class="term-in"><span aria-hidden="true">$</span><input type="text" id="termIn" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Escribe un comando"></div>
+    </div>
+    <div class="chips" id="termChips"></div>
+  </div>
+</section>
+
+<!-- ===================== SOBRE MÍ ===================== -->
+<section id="sobre-mi">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Sobre mí</h2>
+      <p>La persona detrás de este proyecto.</p>
+    </div>
+    <div class="about">
+      <div class="panel">
+        <div class="avatar" aria-hidden="true">SMC</div>
+        <h3>Santo Miguel Coria Suma</h3>
+        <p class="note" style="margin-top:0">Ingeniería Electrónica y Maestría en IA, ML y Data Science</p>
+        <ul class="contact">
+          <li>Correo: <a href="mailto:miguelstcors.etn@gmail.com">miguelstcors.etn@gmail.com</a></li>
+          <li>Facebook: <a href="https://www.facebook.com/share/1KrWixC6Rj" target="_blank" rel="noopener noreferrer">Ver perfil</a></li>
+        </ul>
+      </div>
+      <div class="panel">
+        <p>Me formé en Ingeniería Electrónica en la Universidad Pública de El Alto (UPEA) y hoy estudio la Maestría en Inteligencia Artificial, Machine Learning y Data Science. Este proyecto junta ambos mundos: llevar las ideas de la IA a los sensores, las señales y los sistemas electrónicos.</p>
+        <h3 class="sub-h" style="margin-top:22px">Trayectoria académica</h3>
+        <ol class="timeline">
+          <li><b>UPEA</b>Ingeniería Electrónica: base en circuitos, sistemas digitales, señales y control.</li>
+          <li><b>Maestría</b>Inteligencia Artificial, Machine Learning y Data Science: aprendizaje automático, análisis de datos y aplicaciones de IA.</li>
+        </ol>
+        <h3 class="sub-h" style="margin-top:22px">Áreas de la carrera</h3>
+        <div>
+          <span class="tag">Circuitos y electrónica analógica</span>
+          <span class="tag">Electrónica digital</span>
+          <span class="tag">Microcontroladores y sistemas embebidos</span>
+          <span class="tag">Señales y sistemas</span>
+          <span class="tag">Control automático</span>
+          <span class="tag">Telecomunicaciones</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- ===================== FOOTER ===================== -->
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div>
+        <h3>NEUROCIRCUIT LAB</h3>
+        <p>IA aplicada a la Ingeniería Electrónica.</p>
+        <p>Autor: Santo Miguel Coria Suma</p>
+        <p>© <span id="year">2026</span></p>
+      </div>
+      <div>
+        <h3>Tecnologías utilizadas</h3>
+        <ul><li>HTML5</li><li>CSS3</li><li>JavaScript puro</li></ul>
+      </div>
+      <div>
+        <h3>Enlaces</h3>
+        <ul>
+          <li><a href="mailto:miguelstcors.etn@gmail.com">Correo electrónico</a></li>
+          <li><a href="https://www.facebook.com/share/1KrWixC6Rj" target="_blank" rel="noopener noreferrer">Facebook</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="legal">Proyecto de uso educativo. Los datos, modelos, alertas y métricas que aparecen en esta página son simulados localmente en el navegador y no representan sistemas reales.</p>
+  </div>
+</footer>
+
+<script>
+/* =====================================================
+   NEUROCIRCUIT LAB - Lógica simplificada
+   Solo 3 módulos:
+   1) Navegación (menú móvil + resaltado)
+   2) Demo ML: predicción de falla de motor
+   3) Terminal simulada
+   ===================================================== */
+(function () {
+  'use strict';
+
+  const $  = (s, r) => (r || document).querySelector(s);
+  const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+  /* =====================================================
+     MÓDULO 1: NAVEGACIÓN
+     ===================================================== */
+  function initNav() {
+    const burger = $('#burger');
+    const menu   = $('#menu');
+    if (!burger || !menu) return;
+
+    burger.addEventListener('click', function () {
+      const open = menu.classList.toggle('open');
+      burger.setAttribute('aria-expanded', String(open));
+    });
+
+    // Cierra el menú al pulsar un enlace (útil en móvil)
+    $$('#menu a').forEach(function (a) {
+      a.addEventListener('click', function () {
+        menu.classList.remove('open');
+        burger.setAttribute('aria-expanded', 'false');
+      });
+    });
+
+    // Resalta el enlace de la sección visible
+    if ('IntersectionObserver' in window) {
+      const links = $$('#menu a');
+      const map = new Map(links.map(a => [a.getAttribute('href').slice(1), a]));
+      const io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (en.isIntersecting) {
+            links.forEach(l => l.classList.remove('active'));
+            const l = map.get(en.target.id);
+            if (l) l.classList.add('active');
+          }
+        });
+      }, { rootMargin: '-45% 0px -50% 0px' });
+      map.forEach(function (_, id) {
+        const el = document.getElementById(id);
+        if (el) io.observe(el);
+      });
+    }
+  }
+
+  /* =====================================================
+     MÓDULO 2: DEMO DE MACHINE LEARNING
+     Modelo simulado tipo regresión logística.
+     ===================================================== */
+  function initML() {
+    const temp  = $('#mlTemp');
+    const vib   = $('#mlVib');
+    const hours = $('#mlHours');
+    if (!temp || !vib || !hours) return;
+
+    const tempV  = $('#mlTempV');
+    const vibV   = $('#mlVibV');
+    const hoursV = $('#mlHoursV');
+    const pct    = $('#mlPct');
+    const gauge  = $('#mlGauge');
+    const advice = $('#mlAdvice');
+    const calc   = $('#mlCalc');
+
+    function update() {
+      const t = +temp.value;
+      const v = +vib.value;
+      const h = +hours.value;
+
+      tempV.textContent  = t + ' °C';
+      vibV.textContent   = v.toFixed(1) + ' mm/s';
+      hoursV.textContent = h + ' h';
+
+      // z = combinación lineal de las variables normalizadas
+      const z = 0.04 * (t - 60) + 0.35 * (v - 4) + 0.0004 * (h - 2000);
+      const p = 1 / (1 + Math.exp(-z));   // sigmoide -> 0..1
+      const porcentaje = Math.round(p * 100);
+
+      pct.textContent = porcentaje + '%';
+      gauge.style.width = porcentaje + '%';
+
+      if (porcentaje < 25) {
+        advice.textContent = 'Riesgo bajo. El motor opera dentro de parámetros normales.';
+      } else if (porcentaje < 55) {
+        advice.textContent = 'Riesgo moderado. Conviene programar una revisión.';
+      } else if (porcentaje < 80) {
+        advice.textContent = 'Riesgo alto. Se recomienda mantenimiento preventivo.';
+      } else {
+        advice.textContent = 'Riesgo crítico. Detén el equipo y revisa de inmediato.';
+      }
+
+      calc.textContent =
+        'z = 0.04·(' + t + '−60) + 0.35·(' + v.toFixed(1) + '−4) + 0.0004·(' + h + '−2000)\n' +
+        'z = ' + z.toFixed(3) + '\n' +
+        'P = 1 / (1 + e^(−z)) = ' + p.toFixed(3) + '  →  ' + porcentaje + '%';
+    }
+
+    [temp, vib, hours].forEach(function (el) {
+      el.addEventListener('input', update);
+    });
+    update();
+  }
+
+  /* =====================================================
+     MÓDULO 3: TERMINAL SIMULADA
+     ===================================================== */
+  function initTerminal() {
+    const out = $('#termOut');
+    const inp = $('#termIn');
+    const chips = $('#termChips');
+    if (!out || !inp || !chips) return;
+
+    const HISTORIAL = [
+      'help       Muestra esta ayuda',
+      'info       Información del sistema',
+      'modelos    Lista modelos simulados',
+      'predecir   Ejemplo de predicción',
+      'datos      Muestra estadísticas ficticias',
+      'limpiar    Limpia la pantalla',
+      'sobre      Información del autor'
+    ];
+
+    const COMANDOS = {
+      help: function () {
+        return HISTORIAL.join('\n');
+      },
+      info: function () {
+        return 'NEUROCIRCUIT LAB v1.0\n' +
+               'Entorno: navegador local\n' +
+               'Datos: simulados\n' +
+               'Modelo activo: regresión logística (simulada)';
+      },
+      modelos: function () {
+        return 'Modelos disponibles:\n' +
+               '  - Clasificador de fallas de motor\n' +
+               '  - Detector de anomalías en sensores\n' +
+               '  - Predictor de consumo eléctrico';
+      },
+      predecir: function () {
+        const t = (20 + Math.random() * 100).toFixed(1);
+        const v = (Math.random() * 10).toFixed(1);
+        const h = Math.floor(Math.random() * 5000);
+        const z = 0.04 * (t - 60) + 0.35 * (v - 4) + 0.0004 * (h - 2000);
+        const p = Math.round((1 / (1 + Math.exp(-z))) * 100);
+        return 'Entrada: temp=' + t + '°C, vib=' + v + 'mm/s, horas=' + h + '\n' +
+               'Probabilidad de falla: ' + p + '%';
+      },
+      datos: function () {
+        return 'Estadísticas ficticias:\n' +
+               '  Registros: ' + (1000 + Math.floor(Math.random() * 9000)) + '\n' +
+               '  Sensores activos: ' + (5 + Math.floor(Math.random() * 20)) + '\n' +
+               '  Precisión del modelo: ' + (80 + Math.random() * 15).toFixed(1) + '%';
+      },
+      limpiar: function () {
+        out.innerHTML = '';
+        return null;
+      },
+      sobre: function () {
+        return 'Autor: Santo Miguel Coria Suma\n' +
+               'Ingeniería Electrónica (UPEA) + Maestría en IA, ML y Data Science\n' +
+               'Correo: miguelstcors.etn@gmail.com';
+      }
+    };
+
+    function imprimir(texto, clase) {
+      const div = document.createElement('div');
+      if (clase) div.className = clase;
+      div.textContent = texto;
+      out.appendChild(div);
+      out.scrollTop = out.scrollHeight;
+    }
+
+    function ejecutar(cmd) {
+      const limpio = cmd.trim().toLowerCase();
+      imprimir('$ ' + cmd, 'cmd');
+      if (!limpio) return;
+
+      if (COMANDOS[limpio]) {
+        const r = COMANDOS[limpio]();
+        if (r) imprimir(r);
+      } else {
+        imprimir('Comando no reconocido: "' + limpio + '". Escribe "help".', 'err');
+      }
+      imprimir('');
+    }
+
+    inp.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        ejecutar(inp.value);
+        inp.value = '';
+      }
+    });
+
+    // Botones rápidos
+    ['help', 'info', 'modelos', 'predecir', 'datos', 'sobre', 'limpiar'].forEach(function (c) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip';
+      b.textContent = c;
+      b.addEventListener('click', function () { ejecutar(c); });
+      chips.appendChild(b);
+    });
+
+    // Mensaje inicial
+    imprimir('NEUROCIRCUIT LAB — Terminal simulada');
+    imprimir('Escribe "help" para ver los comandos disponibles.');
+    imprimir('');
+  }
+
+  /* =====================================================
+     ARRANQUE
+     ===================================================== */
+  document.addEventListener('DOMContentLoaded', function () {
+    try { initNav(); }      catch (e) { console.error('Error en navegación:', e); }
+    try { initML(); }       catch (e) { console.error('Error en demo ML:', e); }
+    try { initTerminal(); } catch (e) { console.error('Error en terminal:', e); }
+
+    // Año del footer
+    const y = $('#year');
+    if (y) y.textContent = new Date().getFullYear();
+  });
+})();
+</script>
+</body>
+</html>
